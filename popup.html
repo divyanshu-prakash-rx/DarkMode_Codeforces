@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Codeforces Dark Mode</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo" id="logo">🌙</span>
+        <div class="brand-text">
+          <h1>Codeforces Dark</h1>
+          <p id="statusText">Dark mode is on</p>
+        </div>
+      </div>
+      <label class="switch" title="Turn dark mode on/off">
+        <input type="checkbox" id="toggle" />
+        <span class="slider"></span>
+      </label>
+    </header>
+
+    <div class="themes" id="themes"></div>
+
+    <footer class="foot">
+      <span id="footNote">Stays on across every Codeforces page until you turn it off.</span>
+    </footer>
+  </div>
+
+  <script src="cf-themes.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
