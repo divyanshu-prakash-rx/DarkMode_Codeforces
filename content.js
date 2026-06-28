@@ -58,6 +58,22 @@
     });
   } catch (e) {}
 
+  /* 3b) Answer the popup's "are you alive / is the theme applied?" ping. If this
+   *     listener never responds, the popup knows the content script wasn't
+   *     injected on this tab (e.g. the page was open before the extension was
+   *     installed/enabled) and will reload the tab to apply the theme. */
+  try {
+    chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+      if (msg && msg.type === "cf-ping") {
+        sendResponse({
+          ok: true,
+          applied: document.documentElement.getAttribute("data-cf-dark") === "on"
+        });
+      }
+      return true;
+    });
+  } catch (e) {}
+
   /* 4) The <head> may be (re)built after document_start; make sure the style
    *    survives by re-injecting once the DOM is ready. */
   document.addEventListener("DOMContentLoaded", function () {

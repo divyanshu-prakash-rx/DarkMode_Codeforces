@@ -86,6 +86,7 @@
     markSelected();
     paintPopup(id);
     save();
+    ensureApplied();
   }
 
   function setEnabled(on) {
@@ -95,10 +96,42 @@
     els.statusText.textContent = on ? "Dark mode is on" : "Dark mode is off";
     els.logo.textContent = on ? "🌙" : "☀️"; /* moon / sun */
     save();
+    ensureApplied();
   }
 
   function save() {
     try { chrome.storage.local.set({ enabled: state.enabled, theme: state.theme }); } catch (e) {}
+  }
+
+  /* ----- Auto-reload tabs that don't have the theme yet -----
+   * A page that was open BEFORE the extension was installed/enabled has no
+   * content script, so it can't receive live updates. We ping the active
+   * Codeforces tab; if nothing answers, the theme isn't applied there, so we
+   * reload it once to inject the content script. Tabs that already have the
+   * theme respond and are left untouched (no needless reloads / data loss). */
+  var reloadedTabs = {};
+
+  function isCodeforces(url) {
+    try { return /(^|\.)(codeforces\.com|codeforc\.es)$/.test(new URL(url).hostname); }
+    catch (e) { return false; }
+  }
+
+  function ensureApplied() {
+    if (!state.enabled) return; /* nothing to show while dark mode is off */
+    try {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        var tab = tabs && tabs[0];
+        if (!tab || !tab.id || !isCodeforces(tab.url || "")) return;
+        if (reloadedTabs[tab.id]) return; /* already reloaded this session */
+        chrome.tabs.sendMessage(tab.id, { type: "cf-ping" }, function (resp) {
+          var noContentScript = chrome.runtime.lastError || !resp;
+          if (noContentScript) {
+            reloadedTabs[tab.id] = true;
+            chrome.tabs.reload(tab.id);
+          }
+        });
+      });
+    } catch (e) {}
   }
 
   /* ----- Tiny color helpers (hex math) ----- */
@@ -135,6 +168,8 @@
     els.grid.classList.toggle("disabled", !state.enabled);
     els.statusText.textContent = state.enabled ? "Dark mode is on" : "Dark mode is off";
     els.logo.textContent = state.enabled ? "🌙" : "☀️";
+    /* If the current Codeforces tab isn't themed yet, reload it to apply. */
+    ensureApplied();
   }
 
   try {

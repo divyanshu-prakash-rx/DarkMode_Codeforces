@@ -255,33 +255,87 @@ html[data-cf-dark="on"] .caption {
   text-shadow: none !important;
 }
 
-/* Tables */
+/* ===== Tables (datatables AND plain content tables) =====
+   Codeforces only tags SOME rows with .dark for striping and leaves the rest
+   white. Several content tables (notably the /contests lists) are NOT .datatable,
+   so we also default every table cell inside a content box/roundbox to the box
+   background. !important beats Codeforces' non-important cell colors regardless
+   of specificity. We deliberately use only class selectors (no #id) here so the
+   solved/failed problem tints further down can out-specify these defaults. */
 html[data-cf-dark="on"] .datatable table,
-html[data-cf-dark="on"] table.rtable {
+html[data-cf-dark="on"] table.rtable,
+html[data-cf-dark="on"] .roundbox table,
+html[data-cf-dark="on"] .content-with-sidebar table {
   background-color: transparent !important;
 }
+/* THE key fix for contest/standings/status lists: the standard Codeforces
+   datatable wraps its <table> in an inner <div style="background-color:white">
+   that is a DIRECT child of .datatable. The cells themselves are transparent,
+   so on rows that Codeforces' JS did NOT tag with .dark, that white wrapper is
+   what shows through (producing white/striped rows in dark mode). Neutralize
+   the wrapper (and the decorative corner spacer divs) so the dark box shows. */
+html[data-cf-dark="on"] .datatable > div {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+html[data-cf-dark="on"] .datatable tr,
 html[data-cf-dark="on"] .datatable td,
 html[data-cf-dark="on"] .datatable th,
+html[data-cf-dark="on"] table.rtable tr,
 html[data-cf-dark="on"] table.rtable td,
 html[data-cf-dark="on"] table.rtable th,
+html[data-cf-dark="on"] .bordertable tr,
 html[data-cf-dark="on"] .bordertable td,
-html[data-cf-dark="on"] .bordertable th {
+html[data-cf-dark="on"] .bordertable th,
+html[data-cf-dark="on"] .roundbox table tr,
+html[data-cf-dark="on"] .roundbox table td,
+html[data-cf-dark="on"] .roundbox table th,
+html[data-cf-dark="on"] .content-with-sidebar table tr,
+html[data-cf-dark="on"] .content-with-sidebar table td,
+html[data-cf-dark="on"] .content-with-sidebar table th {
   border-color: var(--cf-border) !important;
+  background-color: transparent !important;
   background-image: none !important;
   color: var(--cf-text) !important;
 }
+/* Header cells */
 html[data-cf-dark="on"] .datatable th,
 html[data-cf-dark="on"] table.rtable th,
-html[data-cf-dark="on"] .bordertable th {
+html[data-cf-dark="on"] .bordertable th,
+html[data-cf-dark="on"] .roundbox table th,
+html[data-cf-dark="on"] .content-with-sidebar table th {
   background-color: var(--cf-bg-3) !important;
 }
+/* Striped rows -> slightly lighter than the box background */
+html[data-cf-dark="on"] tr.dark > td,
 html[data-cf-dark="on"] .datatable tr.dark td,
 html[data-cf-dark="on"] .datatable tr.dark,
-html[data-cf-dark="on"] tr.dark > td {
+html[data-cf-dark="on"] .datatable .dark,
+html[data-cf-dark="on"] .datatable tr.highlighted-row td,
+html[data-cf-dark="on"] .datatable td.dark,
+html[data-cf-dark="on"] .roundbox table tr.dark td,
+html[data-cf-dark="on"] .content-with-sidebar table tr.dark td {
   background-color: var(--cf-bg-3) !important;
 }
+/* Solved / failed problem rows keep a subtle tint. Semi-transparent colors blend
+   over whatever the active theme's box background is, and the higher specificity
+   keeps the indicator alive despite the transparent defaults above. */
+html[data-cf-dark="on"] tr.accepted-problem > td,
+html[data-cf-dark="on"] .roundbox table tr.accepted-problem td,
+html[data-cf-dark="on"] .content-with-sidebar table tr.accepted-problem td,
+html[data-cf-dark="on"] .accepted-problem {
+  background-color: rgba(63, 185, 80, 0.16) !important;
+}
+html[data-cf-dark="on"] tr.rejected-problem > td,
+html[data-cf-dark="on"] .roundbox table tr.rejected-problem td,
+html[data-cf-dark="on"] .content-with-sidebar table tr.rejected-problem td,
+html[data-cf-dark="on"] .rejected-problem {
+  background-color: rgba(248, 81, 73, 0.14) !important;
+}
+/* Row hover */
 html[data-cf-dark="on"] .datatable tr:hover td,
 html[data-cf-dark="on"] table.rtable tr:hover td,
+html[data-cf-dark="on"] .roundbox table tr:hover td,
 html[data-cf-dark="on"] .highlighted-row > td,
 html[data-cf-dark="on"] .highlight {
   background-color: var(--cf-hover) !important;
@@ -444,10 +498,13 @@ html[data-cf-dark="on"] .button:hover {
   color: var(--cf-link-hover) !important;
 }
 
-/* Spoilers / notices / misc panels */
+/* Spoilers / misc panels.
+   NOTE: .notice is intentionally NOT given a box background here — Codeforces
+   reuses .notice for small inline dimmed text (e.g. problemset tags, registrant
+   counts). Boxing it turned every tag into a colored chip. Its color is handled
+   by the dimmed-text rule above. */
 html[data-cf-dark="on"] .spoiler-content,
 html[data-cf-dark="on"] .spoiler,
-html[data-cf-dark="on"] .notice,
 html[data-cf-dark="on"] blockquote,
 html[data-cf-dark="on"] .info-box {
   background-color: var(--cf-bg-3) !important;
